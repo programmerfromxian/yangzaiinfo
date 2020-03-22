@@ -1,0 +1,21 @@
+package com.yy.mgr.back.exception;
+
+
+import lombok.Data;
+
+/**
+ * @author yang
+ * @date 2020/03/22 18:16
+ */
+@Data
+public class InformationException extends Exception{
+
+    private CommonError commonError;
+
+    public InformationException(CommonError commonError) {
+        super();
+        this.commonError = commonError;
+    }
+
+
+}
