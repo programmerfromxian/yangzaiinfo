@@ -1,0 +1,100 @@
+public static void main(String[] args) {
+        long delay;
+        long period;
+        String unit = "";
+        switch (unit) {
+            case "month":
+                DateTime monthDateTime = DateTime.now().withDayOfMonth(10).withHourOfDay(2).withMinuteOfHour(10).withSecondOfMinute(0);
+                if (DateTime.now().isAfter(monthDateTime)) {
+                    // 下个月开始执行
+                    DateTime nextMonthPeriod = DateTime.now().plusMonths(1).withDayOfMonth(10).withHourOfDay(2).withMinuteOfHour(10).withSecondOfMinute(0);
+                    delay = nextMonthPeriod.toDate().getTime() - DateTime.now().toDate().getTime();
+                } else {
+                    // 本月开始执行
+                    delay = monthDateTime.toDate().getTime() - DateTime.now().toDate().getTime();
+                }
+                DateTime nextMonth = DateTime.now().plusMonths(1).withDayOfMonth(10).withHourOfDay(2).withMinuteOfHour(10).withSecondOfMinute(0);
+                period = nextMonth.toDate().getTime() - DateTime.now().toDate().getTime();
+                break;
+            case "week":
+                // 本周第几天第几小时第几分第几秒  本周三2点10分0秒
+                DateTime dateTime = DateTime.now().withDayOfWeek(3).withHourOfDay(2).withMinuteOfHour(10).withSecondOfMinute(0);
+                // 已经过了当前周的周期
+                if (DateTime.now().isAfter(dateTime)) {
+                    DateTime nextWeekPeriod = DateTime.now().plusWeeks(1).withDayOfWeek(3).withHourOfDay(2).withMinuteOfHour(10).withSecondOfMinute(0);
+                    delay = nextWeekPeriod.toDate().getTime() - DateTime.now().toDate().getTime();
+                } else {  // 当前周的周期还没有过
+                    delay = dateTime.toDate().getTime() - DateTime.now().toDate().getTime();
+                }
+                period = 7 * 24 * 3600 * 1000;
+                break;
+            case "day":
+                // 今天三点20分
+                DateTime dateTime1 = DateTime.now().withHourOfDay(3).withMinuteOfHour(20);
+                if (DateTime.now().isAfter(dateTime1)) {
+                    DateTime nextDayPeriod = DateTime.now().plusDays(1).withHourOfDay(3).withMinuteOfHour(20);
+                    delay = nextDayPeriod.toDate().getTime() - DateTime.now().toDate().getTime();
+                } else {
+                    delay = dateTime1.toDate().getTime() - DateTime.now().toDate().getTime();
+                }
+                period = 24 * 3600 * 1000;
+                break;
+            case "hours":
+                DateTime dateTime2 = DateTime.now().withMinuteOfHour(20);
+                if (DateTime.now().isAfter(dateTime2)) {
+                    DateTime nextHourPeriod = DateTime.now().plusHours(1).withMinuteOfHour(20);
+                    delay = nextHourPeriod.toDate().getTime() - DateTime.now().toDate().getTime();
+                } else {
+                    delay = dateTime2.toDate().getTime() - DateTime.now().toDate().getTime();
+                }
+                period = 3600 * 1000;
+                break;
+            case "min":
+                int minutesOfHour = 5;
+                int minutes = DateTime.now().get(DateTimeFieldType.minuteOfHour());
+                int[] periods = new int[60 / minutesOfHour];
+                for (int i = 1; i <= 60 / minutesOfHour; i++) {
+                    periods[i] = i * minutesOfHour;
+                }
+                for (int i = 0; i < periods.length; i++) {
+                    if (periods[i] < DateTime.now().get(DateTimeFieldType.minuteOfHour()) && periods[i + 1] > DateTime.now().get(DateTimeFieldType.minuteOfHour())) {
+                        delay = (periods[i + 1] - DateTime.now().get(DateTimeFieldType.minuteOfHour())) * 60 * 1000;
+                    }
+                }
+                period = minutesOfHour * 60 * 1000;
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void month() {
+        Timer timer = new Timer();
+        int dayOfMonth = 20;
+        int hourOfDay = 2;
+        int minutesOfHour = 15;
+        long delay = DateTime.now().plusDays(1).withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).toDate().getTime() - DateTime.now().toDate().getTime();
+        // 设置的每月定时任务正好在当天，判断一下当天要不要执行一次
+        if (DateTime.now().get(DateTimeFieldType.dayOfMonth()) == dayOfMonth) {
+            if (DateTime.now().isBefore(DateTime.now().withHourOfDay(hourOfDay).withMinuteOfHour(minutesOfHour))) {
+                // 执行一次真正要执行的任务
+            }
+        }
+        // 当天的判断完成之后从之后的一天0时开始每隔一天判断一次当天是不是要执行
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                // 今天要执行一次定时任务了
+                if (DateTime.now().get(DateTimeFieldType.dayOfMonth()) == dayOfMonth) {
+                    Timer innerTimer = new Timer();
+                    // 此线程在指定日期执行完任务之后会停掉
+                    innerTimer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            // todo 执行真正要执行的任务
+                        }
+                    }, DateTime.now().withHourOfDay(hourOfDay).withMinuteOfHour(minutesOfHour).toDate());
+                }
+            }
+        }, delay, 24 * 3600 * 1000);
+    }
