@@ -98,3 +98,42 @@ public static void main(String[] args) {
             }
         }, delay, 24 * 3600 * 1000);
     }
+    public static boolean writeNoChangeOrder(String filePath, String key, String newValue) {
+        File propFile = new File(filePath);
+        String fileDir = filePath.substring(0, filePath.lastIndexOf(File.separator));
+        BufferedReader br = null;
+        BufferedWriter bw = null;
+        if (!propFile.exists()) {
+            LOGGER.error("file {} not exists", filePath);
+            return Boolean.FALSE;
+        }
+        File tempFile = new File(fileDir + File.separator + "temp" + propFile.getName());
+        try {
+            br = new BufferedReader(new FileReader(propFile));
+            bw = new BufferedWriter(new FileWriter(tempFile));
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().startsWith(key)) {
+                    LOGGER.info("find key in file {}, ready to write new value", filePath);
+                    line = key + "=" + newValue;
+                }
+                bw.write(line);
+                if (null != line && !"".equals(line.trim()))
+                    bw.newLine();
+            }
+        } catch (IOException e) {
+            LOGGER.error("error when write key {} to file {}: {}", key, filePath, e);
+            return Boolean.FALSE;
+        } finally {
+            try {
+                br.close();
+                bw.close();
+            } catch (IOException e) {
+                LOGGER.error("error when close stream {}", e);
+                return Boolean.FALSE;
+            }
+            propFile.delete();
+            tempFile.renameTo(propFile);
+        }
+        return Boolean.TRUE;
+    }
