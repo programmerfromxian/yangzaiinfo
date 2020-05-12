@@ -26,6 +26,7 @@ public class CommonExceptionHandler {
             CommonError commonError = informationException.getCommonError();
             return CommonReturn.create(commonError.getErrCode(), commonError.getErrMsg());
         } else {
+            ex.printStackTrace();
             CommonError commonError = ExceptionEnum.UNKNOWN_ERROR;
             return CommonReturn.create(commonError.getErrCode(), commonError.getErrMsg());
         }
