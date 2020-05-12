@@ -1,0 +1,339 @@
+public static void main(String[] args) {
+        long delay;
+        long period;
+        String unit = "";
+        switch (unit) {
+            case "month":
+                DateTime monthDateTime = DateTime.now().withDayOfMonth(10).withHourOfDay(2).withMinuteOfHour(10).withSecondOfMinute(0);
+                if (DateTime.now().isAfter(monthDateTime)) {
+                    // 下个月开始执行
+                    DateTime nextMonthPeriod = DateTime.now().plusMonths(1).withDayOfMonth(10).withHourOfDay(2).withMinuteOfHour(10).withSecondOfMinute(0);
+                    delay = nextMonthPeriod.toDate().getTime() - DateTime.now().toDate().getTime();
+                } else {
+                    // 本月开始执行
+                    delay = monthDateTime.toDate().getTime() - DateTime.now().toDate().getTime();
+                }
+                DateTime nextMonth = DateTime.now().plusMonths(1).withDayOfMonth(10).withHourOfDay(2).withMinuteOfHour(10).withSecondOfMinute(0);
+                period = nextMonth.toDate().getTime() - DateTime.now().toDate().getTime();
+                break;
+            case "week":
+                // 本周第几天第几小时第几分第几秒  本周三2点10分0秒
+                DateTime dateTime = DateTime.now().withDayOfWeek(3).withHourOfDay(2).withMinuteOfHour(10).withSecondOfMinute(0);
+                // 已经过了当前周的周期
+                if (DateTime.now().isAfter(dateTime)) {
+                    DateTime nextWeekPeriod = DateTime.now().plusWeeks(1).withDayOfWeek(3).withHourOfDay(2).withMinuteOfHour(10).withSecondOfMinute(0);
+                    delay = nextWeekPeriod.toDate().getTime() - DateTime.now().toDate().getTime();
+                } else {  // 当前周的周期还没有过
+                    delay = dateTime.toDate().getTime() - DateTime.now().toDate().getTime();
+                }
+                period = 7 * 24 * 3600 * 1000;
+                break;
+            case "day":
+                // 今天三点20分
+                DateTime dateTime1 = DateTime.now().withHourOfDay(3).withMinuteOfHour(20);
+                if (DateTime.now().isAfter(dateTime1)) {
+                    DateTime nextDayPeriod = DateTime.now().plusDays(1).withHourOfDay(3).withMinuteOfHour(20);
+                    delay = nextDayPeriod.toDate().getTime() - DateTime.now().toDate().getTime();
+                } else {
+                    delay = dateTime1.toDate().getTime() - DateTime.now().toDate().getTime();
+                }
+                period = 24 * 3600 * 1000;
+                break;
+            case "hours":
+                DateTime dateTime2 = DateTime.now().withMinuteOfHour(20);
+                if (DateTime.now().isAfter(dateTime2)) {
+                    DateTime nextHourPeriod = DateTime.now().plusHours(1).withMinuteOfHour(20);
+                    delay = nextHourPeriod.toDate().getTime() - DateTime.now().toDate().getTime();
+                } else {
+                    delay = dateTime2.toDate().getTime() - DateTime.now().toDate().getTime();
+                }
+                period = 3600 * 1000;
+                break;
+            case "min":
+                int minutesOfHour = 5;
+                int minutes = DateTime.now().get(DateTimeFieldType.minuteOfHour());
+                int[] periods = new int[60 / minutesOfHour];
+                for (int i = 1; i <= 60 / minutesOfHour; i++) {
+                    periods[i] = i * minutesOfHour;
+                }
+                for (int i = 0; i < periods.length; i++) {
+                    if (periods[i] < DateTime.now().get(DateTimeFieldType.minuteOfHour()) && periods[i + 1] > DateTime.now().get(DateTimeFieldType.minuteOfHour())) {
+                        delay = (periods[i + 1] - DateTime.now().get(DateTimeFieldType.minuteOfHour())) * 60 * 1000;
+                    }
+                }
+                period = minutesOfHour * 60 * 1000;
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void month() {
+        Timer timer = new Timer();
+        int dayOfMonth = 20;
+        int hourOfDay = 2;
+        int minutesOfHour = 15;
+        long delay = DateTime.now().plusDays(1).withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).toDate().getTime() - DateTime.now().toDate().getTime();
+        // 设置的每月定时任务正好在当天，判断一下当天要不要执行一次
+        if (DateTime.now().get(DateTimeFieldType.dayOfMonth()) == dayOfMonth) {
+            if (DateTime.now().isBefore(DateTime.now().withHourOfDay(hourOfDay).withMinuteOfHour(minutesOfHour))) {
+                // 执行一次真正要执行的任务
+            }
+        }
+        // 当天的判断完成之后从之后的一天0时开始每隔一天判断一次当天是不是要执行
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                // 今天要执行一次定时任务了
+                if (DateTime.now().get(DateTimeFieldType.dayOfMonth()) == dayOfMonth) {
+                    Timer innerTimer = new Timer();
+                    // 此线程在指定日期执行完任务之后会停掉
+                    innerTimer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            // todo 执行真正要执行的任务
+                        }
+                    }, DateTime.now().withHourOfDay(hourOfDay).withMinuteOfHour(minutesOfHour).toDate());
+                }
+            }
+        }, delay, 24 * 3600 * 1000);
+    }
+    public static boolean writeNoChangeOrder(String filePath, String key, String newValue) {
+        File propFile = new File(filePath);
+        String fileDir = filePath.substring(0, filePath.lastIndexOf(File.separator));
+        BufferedReader br = null;
+        BufferedWriter bw = null;
+        if (!propFile.exists()) {
+            LOGGER.error("file {} not exists", filePath);
+            return Boolean.FALSE;
+        }
+        File tempFile = new File(fileDir + File.separator + "temp" + propFile.getName());
+        try {
+            br = new BufferedReader(new FileReader(propFile));
+            bw = new BufferedWriter(new FileWriter(tempFile));
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().startsWith(key)) {
+                    LOGGER.info("find key in file {}, ready to write new value", filePath);
+                    line = key + "=" + newValue;
+                }
+                bw.write(line);
+                if (null != line && !"".equals(line.trim()))
+                    bw.newLine();
+            }
+        } catch (IOException e) {
+            LOGGER.error("error when write key {} to file {}: {}", key, filePath, e);
+            return Boolean.FALSE;
+        } finally {
+            try {
+                br.close();
+                bw.close();
+            } catch (IOException e) {
+                LOGGER.error("error when close stream {}", e);
+                return Boolean.FALSE;
+            }
+            propFile.delete();
+            tempFile.renameTo(propFile);
+        }
+        return Boolean.TRUE;
+    }
+
+public class RollingFileAppender extends FileAppender {
+    protected long maxFileSize = 10485760L;
+    protected int maxBackupIndex = 1;
+    private long nextRollover = 0L;
+
+    public RollingFileAppender() {
+    }
+
+    public RollingFileAppender(Layout layout, String filename, boolean append) throws IOException {
+        super(layout, filename, append);
+    }
+
+    public RollingFileAppender(Layout layout, String filename) throws IOException {
+        super(layout, filename);
+    }
+
+    public int getMaxBackupIndex() {
+        return this.maxBackupIndex;
+    }
+
+    public long getMaximumFileSize() {
+        return this.maxFileSize;
+    }
+
+    public void rollOver() {
+        if (this.qw != null) {
+            long size = ((CountingQuietWriter)this.qw).getCount();
+            LogLog.debug("rolling over count=" + size);
+            this.nextRollover = size + this.maxFileSize;
+        }
+
+        LogLog.debug("maxBackupIndex=" + this.maxBackupIndex);
+        boolean renameSucceeded = true;
+        if (this.maxBackupIndex > 0) {
+            File file = new File(this.fileName + '.' + this.maxBackupIndex);
+            if (file.exists()) {
+                renameSucceeded = file.delete();
+            }
+
+            File target;
+            for(int i = this.maxBackupIndex - 1; i >= 1 && renameSucceeded; --i) {
+                file = new File(this.fileName + "." + i);
+                if (file.exists()) {
+                    target = new File(this.fileName + '.' + (i + 1));
+                    LogLog.debug("Renaming file " + file + " to " + target);
+                    renameSucceeded = file.renameTo(target);
+                }
+            }
+
+            if (renameSucceeded) {
+                target = new File(this.fileName + "." + 1);
+                this.closeFile();
+                file = new File(this.fileName);
+                LogLog.debug("Renaming file " + file + " to " + target);
+                renameSucceeded = file.renameTo(target);
+                if (!renameSucceeded) {
+                    try {
+                        this.setFile(this.fileName, true, this.bufferedIO, this.bufferSize);
+                    } catch (IOException var6) {
+                        if (var6 instanceof InterruptedIOException) {
+                            Thread.currentThread().interrupt();
+                        }
+
+                        LogLog.error("setFile(" + this.fileName + ", true) call failed.", var6);
+                    }
+                }
+            }
+        }
+
+        if (renameSucceeded) {
+            try {
+                this.setFile(this.fileName, false, this.bufferedIO, this.bufferSize);
+                this.nextRollover = 0L;
+            } catch (IOException var5) {
+                if (var5 instanceof InterruptedIOException) {
+                    Thread.currentThread().interrupt();
+                }
+
+                LogLog.error("setFile(" + this.fileName + ", false) call failed.", var5);
+            }
+        }
+
+    }
+
+    public synchronized void setFile(String fileName, boolean append, boolean bufferedIO, int bufferSize) throws IOException {
+        super.setFile(fileName, append, this.bufferedIO, this.bufferSize);
+        if (append) {
+            File f = new File(fileName);
+            ((CountingQuietWriter)this.qw).setCount(f.length());
+        }
+
+    }
+
+    public void setMaxBackupIndex(int maxBackups) {
+        this.maxBackupIndex = maxBackups;
+    }
+
+    public void setMaximumFileSize(long maxFileSize) {
+        this.maxFileSize = maxFileSize;
+    }
+
+    public void setMaxFileSize(String value) {
+        this.maxFileSize = OptionConverter.toFileSize(value, this.maxFileSize + 1L);
+    }
+
+    protected void setQWForFiles(Writer writer) {
+        this.qw = new CountingQuietWriter(writer, this.errorHandler);
+    }
+
+    protected void subAppend(LoggingEvent event) {
+        super.subAppend(event);
+        if (this.fileName != null && this.qw != null) {
+            long size = ((CountingQuietWriter)this.qw).getCount();
+            if (size >= this.maxFileSize && size >= this.nextRollover) {
+                this.rollOver();
+            }
+        }
+
+    }
+}
+
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration debug="true"
+                     xmlns:log4j='http://jakarta.apache.org/log4j/'>
+
+    
+    <!--
+        日志依赖
+        <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+                <version>1.7.25</version>
+        </dependency>
+        使用springboot时要排除所有的spring-boot-starter-logging依赖
+    -->
+    <!--name:console输出到控制台-->
+    <appender name="console" class="org.apache.log4j.ConsoleAppender">
+        <!--日志格式-->
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"/>
+        </layout>
+    </appender>
+
+    <!--name:file输出到文件-->
+    <appender name="file" class="com.yy.TarRollingFileAppender">
+        <!--是否在所在的日志文件中进行追加写入-->
+        <param name="append" value="true"/>
+        <!--
+            文件阈值, 达到自动回滚; 回滚规则:达到阈值时将原有文件命名为name.1,name.2,
+            达到最大文件个数时清除最旧的日志文件
+        -->
+        <param name="maxFileSize" value="1KB"/>
+        <!--备份日志文件的最大个数-->
+        <param name="maxBackupIndex" value="10"/>
+        <!--输出日志文件的位置-->
+        <param name="file" value="./a.log"/>
+        <!--
+            %n:换行; %m:日志内容; %p:日志级别; %r:程序启动到现在的毫秒数; %t:当前线程名;
+            %d:日期和时间, 一般使用格式 %d{yyyy-MM-dd HH:mm:ss， SSS}; %l:输出日志事件的发生位置， 同 %F%L%C%M
+            %F:java 源文件名; %L:java 源码行数; %c:java 类名, %C{1}只输出类名, 不包含包名
+            %M:java 方法名
+        -->
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern"
+                   value="%d{yyyy-MM-dd HH:mm:ss} %t %-5p %c{1}:%L - %m%n"/>
+        </layout>
+    </appender>
+
+    <!-- 将日志信息输出到文件，可以配置多久产生一个新的日志信息文件 -->
+    <appender name="dailyFile" class="org.apache.log4j.DailyRollingFileAppender">
+        <!--日志文件存放路径-->
+        <param name="File" value="./a.log"/>
+        <!--
+            设置日志每分钟回滚一次，即产生一个新的日志文件; value值最后定义到哪一个单位
+            就是每隔多长时间; eg:yyyy-MM-dd-HH-mm每隔一分钟;yyyy-MM-dd-HH每隔一小时
+         -->
+        <param name="DatePattern" value="'.'yyyy-MM-dd-HH-mm'.log'"/>
+        <!-- 设置日志输出的样式 -->
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} %t %-5p %c{1}:%L - %m%n"/>
+        </layout>
+    </appender>
+
+    <!--设置某一个包/类的打印级别-->
+    <category name="com.yy.mapper.StudentMapper">
+        <priority value="TRACE"/>
+    </category>
+
+    <root>
+        <!--日志打印级别-->
+        <level value="INFO"/>
+        <!--appender-ref设置哪一个appender打印日志, 可以配置多个-->
+        <appender-ref ref="console"/>
+        <appender-ref ref="file"/>
+<!--        <appender-ref ref="dailyFile"/>-->
+    </root>
+
+</log4j:configuration>
