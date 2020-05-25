@@ -11,66 +11,233 @@
 <body>
 
 <div id="app">
-    <el-container>
-        <el-form ref="installInfo" :model="installInfo" label-width="80px">
-            <el-form-item label="ip">
-                <el-input v-model="installInfo.ip" placeholder="请输入ip"></el-input>
-            </el-form-item>
-            <el-form-item label="port">
-                <el-input v-model="installInfo.port" placeholder="请输入port"></el-input>
-            </el-form-item>
-            <el-form-item label="用户名">
-                <el-input v-model="installInfo.username" placeholder="请输入用户名"></el-input>
-            </el-form-item>
-            <el-form-item label="密码">
-                <el-input v-model="installInfo.password" placeholder="请输入密码"></el-input>
-            </el-form-item>
-            <el-form-item label="ip1">
-                <el-input v-model="installInfo.ip1" placeholder="请输入ip1"></el-input>
-            </el-form-item>
-            <el-form-item label="port1">
-                <el-input v-model="installInfo.port1" placeholder="请输入port1"></el-input>
-            </el-form-item>
-            <el-form-item label="ip2">
-                <el-input v-model="installInfo.ip2" placeholder="请输入ip2"></el-input>
-            </el-form-item>
-            <el-form-item label="port2">
-                <el-input v-model="installInfo.port2" placeholder="请输入port2"></el-input>
-            </el-form-item>
-            <el-form-item label="name">
-                <el-input v-model="installInfo.name" placeholder="请输入name"></el-input>
-            </el-form-item>
-            <el-form-item label="id">
-                <el-input v-model="installInfo.id" placeholder="请输入id"></el-input>
-            </el-form-item>
-            <el-form-item label="sftpusername">
-                <el-input v-model="installInfo.sftpUsername" placeholder="请输入sftpusername"></el-input>
-            </el-form-item>
-            <el-form-item label="sftppassword">
-                <el-input v-model="installInfo.sftpPassword" placeholder="请输入sftppassword"></el-input>
-            </el-form-item>
-            <el-form-item label="filePath">
-                <el-input v-model="installInfo.filePath" placeholder="请输入要上传的文件路径"></el-input>
-            </el-form-item>
-            <el-form-item label="param1">
-                <el-input v-model="installInfo.param1" placeholder="请输入param1"></el-input>
-            </el-form-item>
-            <el-form-item label="param2">
-                <el-input v-model="installInfo.param2" placeholder="请输入param2"></el-input>
-            </el-form-item>
-            <el-form-item label="param3">
-                <el-input v-model="installInfo.param3" placeholder="请输入param3"></el-input>
-            </el-form-item>
-        </el-form>
-    </el-container>
-    <span slot="footer" class="dialog-footer">
+    <el-select v-model="option"
+               placeholder="请选择不同的场景"
+               style="min-width:300px;">
+        <el-option
+                v-for="option in options"
+                :key="option.value"
+                :label="option.label"
+                :value="option.value">
+        </el-option>
+    </el-select>
+    <div id="option1" v-show="option === 'option1'">
+        <el-container>
+            <el-form ref="installInfo" :model="installInfo" label-width="100px">
+                <span>请输入linux参数</span>
+                <hr>
+                <el-form-item>
+                    <el-col :span="11">
+                        <el-form-item label="ip">
+                            <el-input v-model="installInfo.ip" placeholder="请输入ip"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="11">
+                        <el-form-item label="port">
+                            <el-input v-model="installInfo.port" placeholder="请输入port"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-form-item>
+                <el-form-item>
+                    <el-col :span="11">
+                        <el-form-item label="用户名">
+                            <el-input v-model="installInfo.username" placeholder="请输入用户名"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="11">
+                        <el-form-item label="密码">
+                            <el-input v-model="installInfo.password" placeholder="请输入密码"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-form-item>
+                <span>请输入链接参数</span>
+                <hr>
+                <el-form-item>
+                    <el-col :span="11">
+                        <el-form-item label="ip1">
+                            <el-input v-model="installInfo.ip1" placeholder="请输入ip1"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="11">
+                        <el-form-item label="port1">
+                            <el-input v-model="installInfo.port1" placeholder="请输入port1"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-form-item>
+                <el-form-item>
+                    <el-col :span="11">
+                        <el-form-item label="ip2">
+                            <el-input v-model="installInfo.ip2" placeholder="请输入ip2"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="11">
+                        <el-form-item label="port2">
+                            <el-input v-model="installInfo.port2" placeholder="请输入port2"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-form-item>
+                <span>请输入场景1特性参数</span>
+                <hr>
+                <el-form-item>
+                    <el-col :span="11">
+                        <el-form-item label="name">
+                            <el-input v-model="installInfo.name" placeholder="请输入name"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="11">
+                        <el-form-item label="id">
+                            <el-input v-model="installInfo.id" placeholder="请输入id"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-form-item>
+                <span>请输入采集参数</span>
+                <hr>
+                <el-form-item>
+                    <el-col :span="11">
+                        <el-form-item label="sftpusername">
+                            <el-input v-model="installInfo.sftpUsername" placeholder="请输入sftpusername"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="11">
+                        <el-form-item label="sftppassword">
+                            <el-input v-model="installInfo.sftpPassword" placeholder="请输入sftppassword"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-form-item>
+                <el-form-item label="filePath">
+                    <el-col :span="22">
+                        <el-input v-model="installInfo.filePath" placeholder="请输入要上传的文件路径"></el-input>
+                    </el-col>
+                </el-form-item>
+                <el-form-item label="param1">
+                    <el-input v-model="installInfo.param1" placeholder="请输入param1"></el-input>
+                </el-form-item>
+                <el-form-item label="param2">
+                    <el-input v-model="installInfo.param2" placeholder="请输入param2"></el-input>
+                </el-form-item>
+                <el-form-item label="param3">
+                    <el-input v-model="installInfo.param3" placeholder="请输入param3"></el-input>
+                </el-form-item>
+                </el-form-item>
+            </el-form>
+        </el-container>
+        <span slot="footer" class="dialog-footer">
             <el-button @click="editDialogVisible = false">取 消</el-button>
             <el-button type="primary" @click="handleInstall">确 定</el-button>
-    </span>
+        </span>
+    </div>
+
+
+
+
+
+
+    <div id="option2" v-show="option === 'option2'">
+        <el-container>
+            <el-form ref="installInfo1" :model="installInfo1" label-width="100px">
+                <span>请输入linux参数</span>
+                <hr>
+                <el-form-item>
+                    <el-col :span="11">
+                        <el-form-item label="ip">
+                            <el-input v-model="installInfo1.ip" placeholder="请输入ip"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="11">
+                        <el-form-item label="port">
+                            <el-input v-model="installInfo1.port" placeholder="请输入port"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-form-item>
+                <el-form-item>
+                    <el-col :span="11">
+                        <el-form-item label="用户名">
+                            <el-input v-model="installInfo1.username" placeholder="请输入用户名"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="11">
+                        <el-form-item label="密码">
+                            <el-input v-model="installInfo1.password" placeholder="请输入密码"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-form-item>
+                <span>请输入链接参数</span>
+                <hr>
+                <el-form-item>
+                    <el-col :span="11">
+                        <el-form-item label="ip1">
+                            <el-input v-model="installInfo1.ip1" placeholder="请输入ip1"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="11">
+                        <el-form-item label="port1">
+                            <el-input v-model="installInfo1.port1" placeholder="请输入port1"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-form-item>
+                <el-form-item>
+                    <el-col :span="11">
+                        <el-form-item label="ip2">
+                            <el-input v-model="installInfo1.ip2" placeholder="请输入ip2"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="11">
+                        <el-form-item label="port2">
+                            <el-input v-model="installInfo1.port2" placeholder="请输入port2"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-form-item>
+                <span>请输入场景2特性参数</span>
+                <hr>
+                <el-form-item>
+                    <el-col :span="11">
+                        <el-form-item label="id">
+                            <el-input v-model="installInfo1.id" placeholder="请输入id"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-form-item>
+                <span>请输入采集参数</span>
+                <hr>
+                <el-form-item>
+                    <el-col :span="11">
+                        <el-form-item label="sftpusername">
+                            <el-input v-model="installInfo1.sftpUsername" placeholder="请输入sftpusername"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="11">
+                        <el-form-item label="sftppassword">
+                            <el-input v-model="installInfo1.sftpPassword" placeholder="请输入sftppassword"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-form-item>
+                <el-form-item label="filePath">
+                    <el-col :span="22">
+                        <el-input v-model="installInfo1.filePath" placeholder="请输入要上传的文件路径"></el-input>
+                    </el-col>
+                </el-form-item>
+                <el-form-item label="param1">
+                    <el-input v-model="installInfo1.param1" placeholder="请输入param1"></el-input>
+                </el-form-item>
+                <el-form-item label="param2">
+                    <el-input v-model="installInfo1.param2" placeholder="请输入param2"></el-input>
+                </el-form-item>
+                <el-form-item label="param3">
+                    <el-input v-model="installInfo1.param3" placeholder="请输入param3"></el-input>
+                </el-form-item>
+                </el-form-item>
+            </el-form>
+        </el-container>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="editDialogVisible = false">取 消</el-button>
+            <el-button type="primary" @click="handleInstall1">确 定</el-button>
+        </span>
+    </div>
 </div>
 
 </body>
 
 <script src="constants/url.js"></script>
 <script src="install.js"></script>
+<style type="text/css">
+</style>
 </html>
