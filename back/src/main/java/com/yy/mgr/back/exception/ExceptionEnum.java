@@ -1,7 +1,6 @@
 package com.yy.mgr.back.exception;
 
 /**
- *
  * @author yan9
  * @date 2019/09/16 23:03
  */
@@ -16,8 +15,13 @@ public enum ExceptionEnum implements CommonError {
     CREATE_FILE_ERROR(10004, "create data file error"),
     EDIT_INFORMATION_FAIL(30001, "edit information error"),
     ADD_INFORMATION_ERROR(40001, "add information error"),
-    ;
-
+    INVALIDATE_PORT(50001, "port invalidate"),
+    INVALIDATE_IP(50002, "ip invalidate"),
+    INVALIDATE_DIR_NAME(50003, "dir not exists"),
+    MK_DIR_ERROR(50004, "make dir fail"),
+    ASSERT_NULL(60000, "assert null"),
+    SFTP_LOGIN_ERROR(60001, "sftp login fail"),
+    SFTP_ERROR(60002, "sftp error");
 
 
     ExceptionEnum(int errCode, String errMsg) {

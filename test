@@ -337,3 +337,29 @@ public class RollingFileAppender extends FileAppender {
     </root>
 
 </log4j:configuration>
+
+
+
+
+<!--org.apache.logging.log4j-->
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn" name="MyApp" packages="">
+    <Appenders>
+        <RollingRandomAccessFile name="RollingRandomAccessFile" fileName="./app.log"
+                                 filePattern="./app-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="2 KB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="5"/>
+        </RollingRandomAccessFile>
+    </Appenders>
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="RollingRandomAccessFile"/>
+        </Root>
+    </Loggers>
+</Configuration>
