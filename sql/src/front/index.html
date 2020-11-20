@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>数据插入</title>
+    <script src="plugins/vue.js"></script>
+    <script src="plugins/index.js"></script>
+    <script src="plugins/axios-0.18.0.js"></script>
+    <link rel="stylesheet" href="plugins/index.css">
+</head>
+
+
+<body>
+
+<div id="app">
+
+    <el-select v-model="type"
+               placeholder="数据库类型"
+               style="min-width:300px;">
+        <el-option
+                v-for="type in types"
+                :key="type.value"
+                :label="type.label"
+                :value="type.value">
+        </el-option>
+    </el-select>
+    <div id="div1">
+        <el-container>
+            <el-form ref="body" :model="body" label-width="200px">
+                <hr>
+                <el-form-item>
+                    <el-col :span="11">
+                        <el-form-item label="ip">
+                            <el-input v-model="body.ip" placeholder="请输入ip"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="11">
+                        <el-form-item label="port">
+                            <el-input v-model="body.port" placeholder="请输入port"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-form-item>
+                <el-form-item>
+                    <el-col :span="11">
+                        <el-form-item label="用户名">
+                            <el-input v-model="body.username" placeholder="请输入用户名"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="11">
+                        <el-form-item label="密码">
+                            <el-input v-model="body.password" placeholder="请输入密码"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-form-item>
+                <el-form-item>
+                    <el-col :span="11">
+                        <el-form-item label="库名">
+                            <el-input v-model="body.database" placeholder="库名"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="11">
+                        <el-form-item label="表名">
+                            <el-input v-model="body.table" placeholder="表名"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-form-item>
+                <el-form-item>
+                    <el-col>
+                        <el-form-item label="记录">
+                            <el-input v-model="body.record" placeholder="插入记录"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-form-item>
+                <el-form-item>
+                    <el-col :span="11">
+                        <el-form-item label="数量">
+                            <el-input v-model="body.record" placeholder="插入数量"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-form-item>
+            </el-form>
+        </el-container>
+        <span slot="footer" class="dialog-footer" >
+            <el-button type="primary" @click="insert">确 定</el-button>
+        </span>
+    </div>
+</div>
+
+</body>
+
+<script src="constants/url.js"></script>
+<script src="index.js"></script>
+</html>
