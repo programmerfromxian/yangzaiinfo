@@ -14,7 +14,7 @@
 
 <div id="app">
 
-    <el-select v-model="type"
+    <el-select v-model="body.type"
                placeholder="数据库类型"
                style="min-width:300px;">
         <el-option
@@ -64,7 +64,15 @@
                         </el-form-item>
                     </el-col>
                 </el-form-item>
+                <span class="dialog-footer" >
+                    <el-button type="primary" @click="getColumns">获取列信息</el-button>
+                </span>
                 <el-form-item>
+                    <el-col>
+                        <el-form-item label="列信息">
+                            <el-input v-model="columns" placeholder="列信息"></el-input>
+                        </el-form-item>
+                    </el-col>
                     <el-col>
                         <el-form-item label="记录">
                             <el-input v-model="body.record" placeholder="插入记录"></el-input>
@@ -74,7 +82,7 @@
                 <el-form-item>
                     <el-col :span="11">
                         <el-form-item label="数量">
-                            <el-input v-model="body.record" placeholder="插入数量"></el-input>
+                            <el-input v-model="body.count" placeholder="插入数量"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-form-item>

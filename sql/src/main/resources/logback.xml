@@ -11,7 +11,7 @@
     <!--文件输出 -->
     <appender name="logfile" class="ch.qos.logback.core.rolling.RollingFileAppender">
 <!--        <Encoding>UTF-8</Encoding>-->
-        <File>information.log</File>
+        <File>sql.log</File>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <FileNamePattern>information.%d{yyyy-MM-dd}.log.zip</FileNamePattern>
         </rollingPolicy>
@@ -20,14 +20,11 @@
         </encoder>
     </appender>
     <!--指定包/类日志配置-->
-    <logger name="com.yy.mgr.back.dao" level="TRACE"/>
-    <logger name="com.yy.mgr.back.service"  level="DEBUG"/>
-    <logger name="com.zaxxer.hikari.HikariDataSource" level="WARN"/>
-    <logger name="com.zaxxer.hikari.pool.HikariPool" level="WARN"/>
-    <logger name="org.springframework" level="WARN">WARN</logger>
+    <logger name="com.yy" level="TRACE"/>
+    <logger name="org.springframework" level="INFO">WARN</logger>
     <!--指定日志显示类型和级别-->
     <root>
         <level value="INFO" />
-        <appender-ref ref="logfile" />
+        <appender-ref ref="stdout" />
     </root>
 </configuration>

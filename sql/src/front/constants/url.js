@@ -1,6 +1,7 @@
-var basePath = "http://localhost:9091/";
+var basePath = "http://localhost:9090/";
 var URL = {
     SQL: {
         INSERT: this.basePath + "insert",
+        COLUMNS: this.basePath + "columns"
     }
 };

@@ -1,6 +1,7 @@
 new Vue({
     el: "#app",
     data: {
+        columns: "",
         types: [
             {
               value: 'MySQL',
@@ -10,17 +11,16 @@ new Vue({
               label: 'GaussDB'
             }
         ],
-        type: "MySQL",
         body: {
             type: "MySQL",
-            count: "",
-            record: "",
-            ip: "",
-            port: "",
-            username: "",
-            password: "",
-            table: "",
-            database: ""
+            count: "30",
+            record: "1,2,3",
+            ip: "127.0.0.1",
+            port: "3306",
+            username: "root",
+            password: "000000",
+            table: "user",
+            database: "test",
         }
     },
     methods: {
@@ -34,6 +34,23 @@ new Vue({
                 .then(result => {
                     if (result.data.success === true) {
                         this.$message.success(result.data.returnData)
+                    } else {
+                        this.$message.error(result.data.errMsg)
+                    }
+                })
+        },
+        // 新增
+        getColumns: function () {
+            _this = this;
+            axios({
+                method: "POST",
+                url: URL.SQL.COLUMNS,
+                data: this.body,
+            })
+                .then(result => {
+                    if (result.data.success === true) {
+                        console.log(result.data);
+                        _this.columns = result.data.returnData
                     } else {
                         this.$message.error(result.data.errMsg)
                     }

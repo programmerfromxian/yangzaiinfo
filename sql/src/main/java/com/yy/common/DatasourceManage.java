@@ -1,6 +1,7 @@
 package com.yy.common;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.yy.model.Body;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -25,7 +26,7 @@ public class DatasourceManage {
 
     private static ThreadLocal<DruidDataSource> threadLocal = new ThreadLocal<>();
 
-    public static DataSource getDataSource() throws Exception {
+    public static DataSource getDataSource(Body body) throws Exception {
         if (threadLocal.get() == null) {
             DruidDataSource dataSource = new DruidDataSource();
             ClassPathResource classPathResource = new ClassPathResource("druid.properties");
@@ -35,6 +36,10 @@ public class DatasourceManage {
                 properties.load(is);
                 dataSource.configFromPropety(properties);
             }
+            dataSource.setUsername(body.getUsername());
+            dataSource.setPassword(body.getPassword());
+            dataSource.setUrl(getUrl(body));
+            dataSource.setDriverClassName(getDriver(body));
             dataSource.configFromPropety(properties);
             dataSource.setBreakAfterAcquireFailure(true);
             dataSource.setNotFullTimeoutRetryCount(0);
@@ -42,5 +47,25 @@ public class DatasourceManage {
             return threadLocal.get();
         }
         return threadLocal.get();
+    }
+
+    private static String getDriver(Body body) {
+        if (body.getType().equals("MySQL")) {
+            return "com.mysql.jdbc.Driver";
+        }
+        return null;
+    }
+
+    private static String getUrl(Body body) {
+        if (body.getType().equals("MySQL")) {
+            return String.format("jdbc:mysql://%1$s:%2$s/%3$s?serverTimezone=UTC&useUnicode=true", body.getIp(), body.getPort(), body.getDatabase());
+        }
+        return null;
+    }
+
+    public static void clear() {
+        if (threadLocal.get() != null) {
+            threadLocal.get().close();
+        }
     }
 }

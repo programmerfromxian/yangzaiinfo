@@ -31,4 +31,6 @@ public class Body {
 
     private String database;
 
+    private String type;
+
 }

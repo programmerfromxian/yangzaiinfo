@@ -1,5 +1,7 @@
 package com.yy.controller;
 
+import com.yy.common.DatasourceManage;
+import com.yy.exception.ExceptionEnum;
 import com.yy.model.Body;
 import com.yy.model.CommonReturn;
 import org.slf4j.Logger;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
 import java.util.Map;
@@ -21,32 +24,57 @@ import java.util.Map;
  * @data 2020/11/20
  */
 @Controller
-@RequestMapping("/insert")
+@RequestMapping()
 public class SqlController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SqlController.class);
 
-    @RequestMapping(method = RequestMethod.POST)
-    public CommonReturn insert(@RequestBody Body body) {
+    @RequestMapping(method = RequestMethod.POST, path = "/insert")
+    @ResponseBody
+    public CommonReturn insert(@RequestBody Body body) throws Exception {
         if (body.getCount() <= 0) {
-            return CommonReturn.create(false, "输入条数");
+            return CommonReturn.create(ExceptionEnum.COUNT_ERROR.getErrCode(), ExceptionEnum.COUNT_ERROR.getErrMsg());
         }
-        JdbcTemplate jdbcTemplate = new JdbcTemplate();
+        if (body.getCount() >= 100000) {
+            return CommonReturn.create(ExceptionEnum.COUNT_LARGE.getErrCode(), ExceptionEnum.COUNT_LARGE.getErrMsg());
+        }
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(DatasourceManage.getDataSource(body));
         int count = 0;
         try {
-            count = jdbcTemplate.queryForObject("select count * from " + body.getTable() + ";", Integer.class);
+            count = jdbcTemplate.queryForObject("select count(*) from " + body.getTable() + ";", Integer.class);
         } catch (Exception e) {
             LOGGER.error("exception is {}", e);
-            return CommonReturn.create(false, "检查输入的数据库信息");
+            return CommonReturn.create(ExceptionEnum.DATABASE_ERROR.getErrCode(), ExceptionEnum.DATABASE_ERROR.getErrMsg());
         }
         LOGGER.info("init count is {}", count);
-        List<Map<String, Object>> columns = jdbcTemplate.queryForList("");
-        int columnCount = columns.get(0).size();
+        List<Map<String, Object>> columns = jdbcTemplate.queryForList(getColumnSql(body));
+        int columnCount = columns.size();
         LOGGER.info("column count is {}", columnCount);
         String[] recordArray = body.getRecord().split(",");
         if (recordArray.length != columnCount) {
-            return CommonReturn.create(false, "核对输入的列");
+            return CommonReturn.create(ExceptionEnum.RECORD_ERROR.getErrCode(), ExceptionEnum.RECORD_ERROR.getErrMsg());
         }
+        String sql = getSql(body);
+        jdbcTemplate.execute(sql);
+        DatasourceManage.clear();
+        return CommonReturn.create(true, "finish...");
+    }
+
+    @RequestMapping(method = RequestMethod.POST, path = "/columns")
+    @ResponseBody
+    public CommonReturn getColumns(@RequestBody Body body) throws Exception {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(DatasourceManage.getDataSource(body));
+        List<Map<String, Object>> columns = jdbcTemplate.queryForList(getColumnSql(body));
+        StringBuilder sb = new StringBuilder();
+        for (Map<String, Object> column : columns) {
+            sb.append(column.get("column_name"));
+            sb.append(",");
+        }
+        String answer = sb.substring(0, sb.length() - 1);
+        return CommonReturn.create(answer);
+    }
+
+    private String getSql(@RequestBody Body body) {
         StringBuilder sb = new StringBuilder();
         sb.append("insert into ");
         sb.append(body.getTable());
@@ -64,7 +92,16 @@ public class SqlController {
                 sb.append(",");
             }
         }
-        jdbcTemplate.execute(sb.toString());
-        return CommonReturn.create(true, "finish...");
+        return sb.toString();
+    }
+
+    private String getColumnSql(Body body) {
+        if (body.getType().equals("MySQL")) {
+            return String.format("SELECT * FROM information_schema.columns WHERE table_name = '%1$s' AND table_schema = '%2$s';", body.getTable(), body.getDatabase());
+        }
+        if (body.getType().equals("GaussDB")) {
+            return "";
+        }
+        return null;
     }
 }
