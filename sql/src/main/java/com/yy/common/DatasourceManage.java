@@ -66,6 +66,7 @@ public class DatasourceManage {
     public static void clear() {
         if (threadLocal.get() != null) {
             threadLocal.get().close();
+            threadLocal.remove();
         }
     }
 }

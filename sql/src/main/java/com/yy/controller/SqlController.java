@@ -6,16 +6,15 @@ import com.yy.model.Body;
 import com.yy.model.CommonReturn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
 
+import java.io.*;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * description
@@ -35,7 +34,7 @@ public class SqlController {
         if (body.getCount() <= 0) {
             return CommonReturn.create(ExceptionEnum.COUNT_ERROR.getErrCode(), ExceptionEnum.COUNT_ERROR.getErrMsg());
         }
-        if (body.getCount() >= 100000) {
+        if (body.getCount() > 10000) {
             return CommonReturn.create(ExceptionEnum.COUNT_LARGE.getErrCode(), ExceptionEnum.COUNT_LARGE.getErrMsg());
         }
         JdbcTemplate jdbcTemplate = new JdbcTemplate(DatasourceManage.getDataSource(body));
@@ -56,8 +55,9 @@ public class SqlController {
         }
         String sql = getSql(body);
         jdbcTemplate.execute(sql);
+        int finishCount = jdbcTemplate.queryForObject("select count(*) from " + body.getTable() + ";", Integer.class);
         DatasourceManage.clear();
-        return CommonReturn.create(true, "finish...");
+        return CommonReturn.create(true, "成功，初始" + count + "条，添加后总共" + finishCount + "条");
     }
 
     @RequestMapping(method = RequestMethod.POST, path = "/columns")
@@ -68,13 +68,55 @@ public class SqlController {
         StringBuilder sb = new StringBuilder();
         for (Map<String, Object> column : columns) {
             sb.append(column.get("column_name"));
-            sb.append(",");
+            sb.append("(");
+            sb.append(column.get("data_type"));
+            sb.append(")");
+            sb.append(", ");
         }
-        String answer = sb.substring(0, sb.length() - 1);
+        String answer = sb.substring(0, sb.length() - 2);
+        LOGGER.info("return columns is {}", columns);
         return CommonReturn.create(answer);
     }
 
-    private String getSql(@RequestBody Body body) {
+    @RequestMapping(method = RequestMethod.GET, path = "loadParam")
+    @ResponseBody
+    public CommonReturn loadParam(@RequestParam String type) throws Exception {
+        LOGGER.info("type is {}", type);
+        String userDirPath = System.getProperty("user.dir");
+        Body body = null;
+        if (type.equals("MySQL")) {
+            String path = userDirPath + File.separator + "config" + File.separator + "MySQL.properties";
+            LOGGER.info("mysql config file path is {}", path);
+            body = getBody(path, type);
+        }
+        if (type.equals("GaussDB")) {
+            String path = userDirPath + File.separator + "config" + File.separator + "GaussDB.properties";
+            LOGGER.info("gaussdb config file path is {}", path);
+            body = getBody(path, type);
+        }
+        LOGGER.info("config file body is {}", body);
+        return CommonReturn.create(body);
+    }
+
+    private Body getBody(String path, String type) throws IOException {
+        try (InputStream is = new FileInputStream(path)) {
+            Properties properties = new Properties();
+            properties.load(is);
+            Body body = Body.builder().username(properties.getProperty("username"))
+                    .password(properties.getProperty("password"))
+                    .ip(properties.getProperty("ip"))
+                    .port(properties.getProperty("port"))
+                    .database(properties.getProperty("database"))
+                    .table(properties.getProperty("table"))
+                    .count(StringUtils.isEmpty(properties.getProperty("count")) ? 0 : Integer.parseInt(properties.getProperty("count")))
+                    .record(properties.getProperty("record"))
+                    .type(type)
+                    .build();
+            return body;
+        }
+    }
+
+    private String getSql(Body body) {
         StringBuilder sb = new StringBuilder();
         sb.append("insert into ");
         sb.append(body.getTable());
@@ -82,17 +124,34 @@ public class SqlController {
         for (int i = 0; i < body.getCount(); i++) {
             if (i == body.getCount() - 1) {
                 sb.append("(");
-                sb.append(body.getRecord());
+                sb.append(getValue(body.getRecord()));
                 sb.append(")");
                 sb.append(";");
             } else {
                 sb.append("(");
-                sb.append(body.getRecord());
+                sb.append(getValue(body.getRecord()));
                 sb.append(")");
                 sb.append(",");
             }
         }
         return sb.toString();
+    }
+
+    private String getValue(String record) {
+        String[] split = record.split(",");
+        StringBuilder sb = new StringBuilder();
+        for (String s : split) {
+            if (s.equals("null")) {
+                sb.append(s);
+                sb.append(",");
+            } else {
+                sb.append("'");
+                sb.append(s);
+                sb.append("'");
+                sb.append(",");
+            }
+        }
+        return sb.substring(0, sb.length() - 1);
     }
 
     private String getColumnSql(Body body) {
@@ -104,4 +163,5 @@ public class SqlController {
         }
         return null;
     }
+
 }

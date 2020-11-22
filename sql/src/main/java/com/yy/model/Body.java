@@ -1,5 +1,6 @@
 package com.yy.model;
 
+import lombok.Builder;
 import lombok.Data;
 
 /**
@@ -9,6 +10,7 @@ import lombok.Data;
  * @data 2020/11/20
  */
 @Data
+@Builder
 public class Body {
 
     private String record;

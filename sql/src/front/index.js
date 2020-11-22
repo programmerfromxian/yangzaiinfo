@@ -1,6 +1,7 @@
 new Vue({
     el: "#app",
     data: {
+        restaurants: [],
         columns: "",
         types: [
             {
@@ -23,7 +24,28 @@ new Vue({
             database: "test",
         }
     },
+    created: function () {
+         this.changeType("MySQL")
+    },
     methods: {
+        changeType: function(type) {
+            _this = this;
+            axios({
+                method: "GET",
+                url: URL.SQL.LOAD_PARAM,
+                withCredentials: true,
+                params: {
+                    type: type
+                },
+            })
+                .then(result => {
+                    if (result.data.success === true) {
+                        _this.body = result.data.returnData
+                    } else {
+                        this.$message.error(result.data.errMsg)
+                    }
+                })
+        },
         // 新增
         insert: function () {
             axios({
@@ -33,7 +55,11 @@ new Vue({
             })
                 .then(result => {
                     if (result.data.success === true) {
-                        this.$message.success(result.data.returnData)
+                        _this.$notify({
+                            title: '结果',
+                            message: result.data.returnData,
+                            duration: 0
+                    });
                     } else {
                         this.$message.error(result.data.errMsg)
                     }
@@ -49,7 +75,6 @@ new Vue({
             })
                 .then(result => {
                     if (result.data.success === true) {
-                        console.log(result.data);
                         _this.columns = result.data.returnData
                     } else {
                         this.$message.error(result.data.errMsg)

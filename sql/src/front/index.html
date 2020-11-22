@@ -16,7 +16,8 @@
 
     <el-select v-model="body.type"
                placeholder="数据库类型"
-               style="min-width:300px;">
+               style="min-width:300px;"
+               @change="changeType">
         <el-option
                 v-for="type in types"
                 :key="type.value"
@@ -64,15 +65,26 @@
                         </el-form-item>
                     </el-col>
                 </el-form-item>
-                <span class="dialog-footer" >
-                    <el-button type="primary" @click="getColumns">获取列信息</el-button>
-                </span>
+                <el-form-item>
+                    <el-col push=4>
+                        <span class="dialog-footer">
+                            <el-button type="primary" @click="getColumns">获取列信息</el-button>
+                        </span>
+                    </el-col>
+                </el-form-item>
                 <el-form-item>
                     <el-col>
                         <el-form-item label="列信息">
-                            <el-input v-model="columns" placeholder="列信息"></el-input>
+                            <el-input
+                                    v-model="columns"
+                                    type="textarea"
+                                    :autosize="{ minRows: 2, maxRows: 4}"
+                                    placeholder="列信息">
+                            </el-input>
                         </el-form-item>
                     </el-col>
+                </el-form-item>
+                <el-form-item>
                     <el-col>
                         <el-form-item label="记录">
                             <el-input v-model="body.record" placeholder="插入记录"></el-input>
@@ -86,12 +98,21 @@
                         </el-form-item>
                     </el-col>
                 </el-form-item>
+                <el-form-item>
+                    <el-col push="4">
+                        <el-form-item>
+                            <span class="dialog-footer">
+                                <el-button type="primary" @click="insert">确 定</el-button>
+                            </span>
+                        </el-form-item>
+                    </el-col>
+                </el-form-item>
             </el-form>
         </el-container>
-        <span slot="footer" class="dialog-footer" >
-            <el-button type="primary" @click="insert">确 定</el-button>
-        </span>
     </div>
+    <div>
+    </div>
+
 </div>
 
 </body>
